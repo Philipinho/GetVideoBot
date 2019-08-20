@@ -21,7 +21,7 @@ public class Run {
                 try {
 
                     String user = Bot.twitter.showStatus(Long.parseLong(mentionTweet)).getUser().getScreenName();
-                    String mediaTweetUser = Bot.twitter.showUser(Long.parseLong(mediaTweet)).getScreenName();
+                    String mediaTweetUser = Bot.twitter.showStatus(Long.parseLong(mediaTweet)).getUser().getScreenName();
                     String mediaTweetText = Bot.twitter.showStatus(Long.parseLong(mediaTweet)).getText();
 
                     if (DBHelper.getMention(mentionTweet).equals(mentionTweet)) {
