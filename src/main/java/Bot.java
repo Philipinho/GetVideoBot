@@ -1,5 +1,4 @@
 import twitter4j.*;
-import utils.DBHelper;
 
 import java.util.*;
 
@@ -19,10 +18,10 @@ public class Bot {
         }
     }
 
-    public static String fetchVideo(String statusID) {
-        String videoURl = "";
+    public static String fetchMedia(String statusId) {
+        String mediaUrl = "";
         try{
-            Status status = twitter.showStatus(Long.parseLong(statusID));
+            Status status = twitter.showStatus(Long.parseLong(statusId));
 
             for (MediaEntity media : status.getMediaEntities()) {
                 MediaEntity.Variant[] variants = media.getVideoVariants();
@@ -32,7 +31,7 @@ public class Bot {
                 for (int i =0; i < variants.length;i++) {
                     if (variants[i].getContentType().equals("video/mp4")) {
                         if (variants[i].getBitrate() == maxVariant(bitrate, variants[i].getBitrate())) {
-                            videoURl = variants[i].getUrl();
+                            mediaUrl = variants[i].getUrl();
                         }
                     }
                 }
@@ -40,7 +39,7 @@ public class Bot {
         } catch (TwitterException e) {
             e.printStackTrace();
         }
-        return videoURl;
+        return mediaUrl;
     }
 
     public static int maxVariant(List<Integer> bitrate, int variant){
@@ -51,12 +50,14 @@ public class Bot {
 
     public static Map<String, String> findMentions() {
 
-        Map<String,String> statusID = new HashMap<>();
+        Map<String,String> statusId = new HashMap<>();
         Paging paging = new Paging();
-        paging.count(200);
-        paging.setSinceId(Long.parseLong(DBHelper.lastSearchID()));
+        paging.count(10);
+
         try {
-            User user = twitter.verifyCredentials();
+            paging.setSinceId(twitter.getUserTimeline().get(0).getId());
+            paging.setMaxId(twitter.getMentionsTimeline().get(0).getId());
+
             List<Status> mentionList = twitter.getMentionsTimeline(paging);
 
             for (Status tweet : mentionList) {
@@ -72,8 +73,8 @@ public class Bot {
 
                         for (int j = 0; j < variants.length; j++) {
                             if ((!tweetReferenced.equals("-1")) && variants[j].getContentType().equals("video/mp4")) {
-                                String tweetID = String.valueOf(tweet.getId());
-                                statusID.put(tweetReferenced, tweetID);
+                                String tweetId = String.valueOf(tweet.getId());
+                                statusId.put(tweetReferenced, tweetId);
                             }
                         }
                     }
@@ -84,15 +85,15 @@ public class Bot {
             e.printStackTrace();
         }
 
-        return statusID;
+        return statusId;
     }
 
-    public static String tweetMessage(String username, String tweetID){
+    public static String tweetMessage(String username, String tweetId){
         String userMention = "@" + username;
         String[] messages = {"Yes! video, it's here: ", "Alright, i got this: ", "Video? Here we go: ", "Yes! video is ready: ", "Yes, Video! At your service: "};
         int rand = (int)(messages.length * Math.random());
 
-        return userMention + " " + messages[rand] + fetchVideo(tweetID);
+        return userMention + " " + messages[rand] + fetchMedia(tweetId);
     }
 
 }

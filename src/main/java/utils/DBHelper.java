@@ -4,49 +4,19 @@ import java.sql.*;
 
 public class DBHelper {
     private static Connection connection;
-    private static final String DATABASE = "jdbc:sqlite:/src/main/resources/tweet-records.db";
+    private static final String DATABASE = ReadProperty.getValue("mysql.db");
 
-    public static void createDatabase(){
-        try {
-            connection = DriverManager.getConnection(DATABASE);
-            if (connection != null){
-                System.out.println("Database created.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void createNewTable() {
-        String sql = "CREATE TABLE TweetRecords (\n" +
-                " ID integer PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
-                " Username text NOT NULL,\n" +
-                " MentionID text NOT NULL UNIQUE,\n" +
-                " VideoTweetID text NOT NULL,\n" +
-                " VideoURL text NOT NULL,\n" +
-                "TimeStamp DATETIME DEFAULT CURRENT_TIMESTAMP\n" +
-                ");";
-        try {
-            connection = DriverManager.getConnection(DATABASE);
-            Statement stmt = connection.createStatement();
-
-            stmt.execute(sql);
-            connection.close();
-            System.out.println("Database table created successfully.");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static void saveTweet(String username, String mentionID, String videoTweetID, String videoURL) {
-        String sql = "INSERT INTO TweetRecords(Username, MentionID, VideoTweetID, VideoURL) VALUES(?,?,?,?)";
+    public static void saveTweet(String username, String mentionId, String mediaTweetId, String mediaUrl, String mediaTweetUser, String mediaTweetText) {
+        String sql = "INSERT INTO tweet_records(username, mention_id, media_tweet_id, media_url, media_tweet_user, media_tweet_text) VALUES(?,?,?,?,?,?)";
         try {
             connection = DriverManager.getConnection(DATABASE);
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, username);
-            ps.setString(2, mentionID);
-            ps.setString(3, videoTweetID);
-            ps.setString(4, videoURL);
+            ps.setString(2, mentionId);
+            ps.setString(3, mediaTweetId);
+            ps.setString(4, mediaUrl);
+            ps.setString(5,mediaTweetUser);
+            ps.setString(6,mediaTweetText);
             ps.executeUpdate();
             connection.close();
         } catch (SQLException e) {
@@ -54,34 +24,35 @@ public class DBHelper {
         }
     }
 
-    public static String getMention(String mentionID) {
-        String mention = "";
+    public static String getMention(String mentionId) {
+        StringBuilder mention = new StringBuilder();
         try {
             connection = DriverManager.getConnection(DATABASE);
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM TweetRecords WHERE MentionID =" + mentionID + ";");
+            PreparedStatement ps = connection.prepareStatement("SELECT mention_id FROM tweet_records WHERE mention_id =" + mentionId + ";");
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                mention += rs.getString("MentionID");
+                mention.append(rs.getString("mention_id"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return mention;
+        return mention.toString();
     }
 
-    public static String lastSearchID() {
-        String sinceID = "";
+    public static String lastSearchId() {
+        StringBuilder sinceId = new StringBuilder();
         try {
             connection = DriverManager.getConnection(DATABASE);
-            PreparedStatement ps = connection.prepareStatement("SELECT MentionID FROM TweetRecords ORDER BY ID DESC LIMIT 1;");
+            PreparedStatement ps = connection.prepareStatement("SELECT mention_id FROM tweet_records ORDER BY Id DESC LIMIT 1;");
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
-                sinceID += rs.getString("MentionID");
+                sinceId.append(rs.getString("mention_id"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return sinceID;
+        return sinceId.toString();
     }
 }

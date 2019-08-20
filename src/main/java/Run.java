@@ -1,41 +1,51 @@
+import twitter4j.TwitterException;
 import utils.DBHelper;
+import utils.ReadProperty;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 public class Run {
-    private static int sleepTime = 240000; // 4 minutes in milliseconds
 
     public static void StartApplication(){
 
-    while (true) {
-    for (String mentionID : Bot.findMentions().keySet()){
-        String tweetWithMedia = mentionID;
-        String mentionTweet = Bot.findMentions().get(mentionID);
+        while (true) {
 
-        try {
+            String mediaTweet = "";
+            String mentionTweet = "";
 
-            String user = Bot.twitter.showStatus(Long.parseLong(mentionTweet)).getUser().getScreenName();
+            for (Map.Entry<String, String> tweetSet : Bot.findMentions().entrySet()){
+                mediaTweet = tweetSet.getKey();
+                mentionTweet = tweetSet.getValue();
 
-            if (DBHelper.getMention(mentionTweet).equals(mentionTweet)) {
-                System.out.println("Record already exist.");
+                try {
+
+                    String user = Bot.twitter.showStatus(Long.parseLong(mentionTweet)).getUser().getScreenName();
+                    String mediaTweetUser = Bot.twitter.showUser(Long.parseLong(mediaTweet)).getScreenName();
+                    String mediaTweetText = Bot.twitter.showStatus(Long.parseLong(mediaTweet)).getText();
+
+                    if (DBHelper.getMention(mentionTweet).equals(mentionTweet)) {
+                        System.out.println("Record already exist.");
+                    }
+                    else {
+
+                        DBHelper.saveTweet(user, mentionTweet, mediaTweet, Bot.fetchMedia(mediaTweet), mediaTweetUser, mediaTweetText);
+
+                        Bot.replyTweet(Bot.tweetMessage(user, mediaTweet), mentionTweet);
+                    }
+
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
             }
-            else {
 
-                Bot.replyTweet(Bot.tweetMessage(user, mentionID), mentionTweet);
-
-				DBHelper.saveTweet(user, mentionTweet, tweetWithMedia, Bot.fetchVideo(tweetWithMedia));
+            try {
+                System.out.println("Bot is sleeping.");
+                Thread.sleep(Long.parseLong(ReadProperty.getValue("bot.sleeptime")));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-    }
-
-    try {
-        System.out.println("Application is Sleeping for 4 minutes.");
-        Thread.sleep(sleepTime);
-    } catch (Exception e) {
-        System.out.println(e.getMessage());
-    }
-
-		}
     }
 }
