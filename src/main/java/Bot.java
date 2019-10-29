@@ -57,12 +57,19 @@ public class Bot {
         try {
             paging.setSinceId(twitter.getUserTimeline().get(0).getId());
             paging.setMaxId(twitter.getMentionsTimeline().get(0).getId());
-
+  
             List<Status> mentionList = twitter.getMentionsTimeline(paging);
-
+            
+            String tweetReferenced = "-1";
+            
             for (Status tweet : mentionList) {
-
-                String tweetReferenced = String.valueOf(tweet.getInReplyToStatusId());
+                
+                if (tweet.getQuotedStatus() != null){
+                    tweetReferenced = String.valueOf(tweet.getQuotedStatusId());
+                } else {
+                    tweetReferenced = String.valueOf(tweet.getInReplyToStatusId());
+                }
+                
                 ResponseList<Status> statuses = twitter.lookup(Long.parseLong(tweetReferenced));
 
                 for (Status mediaFilter : statuses) {
