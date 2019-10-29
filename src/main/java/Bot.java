@@ -52,11 +52,10 @@ public class Bot {
 
         Map<String,String> statusId = new HashMap<>();
         Paging paging = new Paging();
-        paging.count(10);
+        paging.count(30);
 
         try {
-            paging.setSinceId(twitter.getUserTimeline().get(0).getId());
-            paging.setMaxId(twitter.getMentionsTimeline().get(0).getId());
+            paging.setSinceId(twitter.getUserTimeline().get(10).getId());
   
             List<Status> mentionList = twitter.getMentionsTimeline(paging);
             
