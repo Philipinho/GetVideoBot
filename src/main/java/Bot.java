@@ -55,7 +55,7 @@ public class Bot {
         paging.count(30);
 
         try {
-            paging.setSinceId(twitter.getUserTimeline().get(10).getId());
+            paging.setSinceId(twitter.getUserTimeline().get(0).getId());
   
             List<Status> mentionList = twitter.getMentionsTimeline(paging);
             
