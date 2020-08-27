@@ -34,6 +34,7 @@ public class DBHelper {
             while (rs.next()) {
                 mention.append(rs.getString("mention_id"));
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -50,6 +51,7 @@ public class DBHelper {
             while (rs.next()) {
                 sinceId.append(rs.getString("mention_id"));
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
