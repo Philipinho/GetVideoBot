@@ -48,14 +48,17 @@ public class Bot {
         return bitrate.get(bitrate.size()-1);
     }
 
-    public static Map<String, String> findMentions() {
+    public static Map<String, String> findMentions(String lastId) {
 
         Map<String,String> statusId = new HashMap<>();
         Paging paging = new Paging();
-        paging.count(30);
+        paging.count(200);
 
         try {
-            paging.setSinceId(twitter.getUserTimeline().get(0).getId());
+            
+            if (!lastId.isEmpty()){
+                paging.setSinceId(Long.parseLong(lastId));
+            }
   
             List<Status> mentionList = twitter.getMentionsTimeline(paging);
             
