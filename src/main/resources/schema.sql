@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS `tweet_records` (
   `media_tweet_id` varchar(255) DEFAULT NULL,
   `media_url` varchar(255) DEFAULT NULL,
   `media_tweet_user` varchar(20) DEFAULT NULL,
-  `media_tweet_text` varchar(300) DEFAULT NULL,
+  `media_tweet_text` varchar(1000) DEFAULT NULL,
   `time_saved` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY(`mention_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
