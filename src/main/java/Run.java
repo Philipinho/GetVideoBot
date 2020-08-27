@@ -14,7 +14,7 @@ public class Run {
             String mediaTweet = "";
             String mentionTweet = "";
 
-            for (Map.Entry<String, String> tweetSet : Bot.findMentions().entrySet()){
+            for (Map.Entry<String, String> tweetSet : Bot.findMentions(DBHelper.lastSearchId()).entrySet()){
                 mediaTweet = tweetSet.getKey();
                 mentionTweet = tweetSet.getValue();
 
