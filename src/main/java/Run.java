@@ -8,13 +8,15 @@ import java.util.Map;
 public class Run {
 
     public static void StartApplication(){
-
+        
+        String lastId = DBHelper.lastSearchId();
+        
         while (true) {
 
             String mediaTweet = "";
             String mentionTweet = "";
 
-            for (Map.Entry<String, String> tweetSet : Bot.findMentions(DBHelper.lastSearchId()).entrySet()){
+            for (Map.Entry<String, String> tweetSet : Bot.findMentions(lastId).entrySet()){
                 mediaTweet = tweetSet.getKey();
                 mentionTweet = tweetSet.getValue();
 
