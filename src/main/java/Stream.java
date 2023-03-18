@@ -99,7 +99,7 @@ public class Stream {
                                 String responseText = tweetMessage(userToReply);
 
                                 try {
-                                  //  replyTweet(responseText, tweet.getId(), userToReply);
+                                    replyTweet(responseText, tweet.getId(), userToReply);
                                 } catch (Exception e) {
 
                                     if (e.getMessage().contains("User is over daily status update limit")) {
