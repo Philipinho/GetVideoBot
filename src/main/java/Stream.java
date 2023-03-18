@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Stream {
 
@@ -83,10 +85,10 @@ public class Stream {
 
                     if (tweetReferencedId != null) {
 
+
                         Tweet mediaTweet = twitter.getTweet(tweetReferencedId);
 
-                        if (mediaTweet.getMedia() != null && !mediaTweet.getMedia().isEmpty()
-                                && mediaTweet.getMedia().get(0).getType().equals("video")) {
+                        if (mediaTweet.getMedia() != null && !mediaTweet.getMedia().isEmpty() && mediaTweet.getMedia().get(0).getType().equals("video")) {
 
                             TweetV2.MediaEntityV2 mediaEntity = (TweetV2.MediaEntityV2) mediaTweet.getMedia().get(0);
                             String thumbnail = mediaEntity.getPreviewImageUrl();
@@ -95,32 +97,43 @@ public class Stream {
                             String isSensitive = ""; // temporary
                             String videoUrl = ""; // don't really need it
 
+                            boolean shouldReply = true;
 
-                            DBHelper.saveTweet(tweet.getUser().getName(), tweet.getId(), mediaTweet.getId(),
-                                    videoUrl, thumbnail, mediaTweetUser, mediaTweetText, isSensitive);
+                            // fix reply bug - a case were the bot replies where it is not intentionally called
+                            // on its own video post or retweeted video posts
 
-                            String userToReply = tweet.getUser().getName();
-                            String responseText = tweetMessage(userToReply);
-
-                            try {
-
-                                replyTweet(responseText, tweet.getId(), userToReply);
-
-                            } catch (Exception e) {
-
-                                if (e.getMessage().contains("User is over daily status update limit")) {
-                                    System.out.println("limit reached");
-
-                                } else {
-                                    System.out.println(e.getMessage());
+                            if (mediaTweetUser.equalsIgnoreCase(botUsername.split("@")[1]) // get username without @ symbol
+                                    || mediaTweetUser.equalsIgnoreCase("crazyvideoclips")) {
+                                // get number of times the bot appears in a tweet
+                                if (getMentionCount(tweet.getText(), botUsername.toLowerCase()) == 1) {
+                                    shouldReply = false;
                                 }
                             }
+
+                            if (shouldReply) {
+                                DBHelper.saveTweet(tweet.getUser().getName(), tweet.getId(), mediaTweet.getId(), videoUrl, thumbnail, mediaTweetUser, mediaTweetText, isSensitive);
+
+                                String userToReply = tweet.getUser().getName();
+                                String responseText = tweetMessage(userToReply);
+
+                                try {
+                                    replyTweet(responseText, tweet.getId(), userToReply);
+                                } catch (Exception e) {
+
+                                    if (e.getMessage().contains("User is over daily status update limit")) {
+                                        System.out.println("limit reached");
+
+                                    } else {
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
+                            }
+
 
                         }
 
                     }
-                } catch (
-                        Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -139,6 +152,22 @@ public class Stream {
 
     }
 
+    public static int getMentionCount(String tweetText, String username) {
+        String regex_url = "(?<=^|(?<=[^a-zA-Z0-9-_\\.]))@([A-Za-z]+[A-Za-z0-9_]+)";
+        int count = 0;
+
+        Pattern pattern = Pattern.compile(regex_url);
+        Matcher matcher = pattern.matcher(tweetText.toLowerCase());
+
+        while (matcher.find()) {
+            if (matcher.group(0).equalsIgnoreCase(username)) {
+                count += 1;
+            }
+        }
+
+        return count;
+    }
+
     private static String getUserPage(String username) {
         String userPage = ReadProperty.getValue("website.url") + "/" + username;
         String notice = "\n\nAd: Follow @CrazyVideoClips for crazy and viral videos.";
@@ -154,11 +183,7 @@ public class Stream {
 
     private static void replyTweet(String text, String inReplyToTweetId, String whoMentionedMe) {
 
-        TweetParameters tweetParams = TweetParameters.builder()
-                .text(text)
-                .reply(TweetParameters.Reply
-                        .builder().inReplyToTweetId(inReplyToTweetId).build())
-                .build();
+        TweetParameters tweetParams = TweetParameters.builder().text(text).reply(TweetParameters.Reply.builder().inReplyToTweetId(inReplyToTweetId).build()).build();
 
         try {
             Tweet tweet = twitter.postTweet(tweetParams);
