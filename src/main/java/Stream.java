@@ -33,7 +33,6 @@ public class Stream {
                     for (StreamRules.StreamRule rule : rules) {
                         if (!Objects.equals(rule.getValue(), botUsername)) {
                             twitter.deleteFilteredStreamRuleId(rule.getId());
-                            System.out.println(twitter.addFilteredStreamRule(botUsername, ""));
                         }
                     }
                 }
