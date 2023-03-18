@@ -30,9 +30,11 @@ public class Stream {
                 if (rules == null) {
                     twitter.addFilteredStreamRule(botUsername, "");
                 } else {
+
                     for (StreamRules.StreamRule rule : rules) {
                         if (!Objects.equals(rule.getValue(), botUsername)) {
                             twitter.deleteFilteredStreamRuleId(rule.getId());
+                            twitter.addFilteredStreamRule(botUsername, "");
                         }
                     }
                 }
