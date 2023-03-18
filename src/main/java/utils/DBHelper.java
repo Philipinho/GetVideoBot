@@ -6,8 +6,8 @@ public class DBHelper {
     private static Connection connection;
     private static final String DATABASE = ReadProperty.getValue("mysql.db");
 
-    public static void saveTweet(String username, String mentionId, String mediaTweetId, String mediaUrl, String mediaTweetUser, String mediaTweetText) {
-        String sql = "INSERT INTO tweet_records(username, mention_id, media_tweet_id, media_url, media_tweet_user, media_tweet_text) VALUES(?,?,?,?,?,?)";
+    public static void saveTweet(String username, String mentionId, String mediaTweetId, String mediaUrl, String thumbnail, String mediaTweetUser, String mediaTweetText, String isSensitive) {
+        String sql = "INSERT INTO tweet_records(username, mention_id, media_tweet_id, media_url, thumbnail, media_tweet_user, media_tweet_text, is_sensitive) VALUES(?,?,?,?,?,?,?,?)";
         try {
             connection = DriverManager.getConnection(DATABASE);
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -15,8 +15,10 @@ public class DBHelper {
             ps.setString(2, mentionId);
             ps.setString(3, mediaTweetId);
             ps.setString(4, mediaUrl);
-            ps.setString(5,mediaTweetUser);
-            ps.setString(6,mediaTweetText);
+            ps.setString(5, thumbnail);
+            ps.setString(6,mediaTweetUser);
+            ps.setString(7,mediaTweetText);
+            ps.setString(8,isSensitive);
             ps.executeUpdate();
             connection.close();
         } catch (SQLException e) {
@@ -28,7 +30,9 @@ public class DBHelper {
         StringBuilder mention = new StringBuilder();
         try {
             connection = DriverManager.getConnection(DATABASE);
-            PreparedStatement ps = connection.prepareStatement("SELECT mention_id FROM tweet_records WHERE mention_id =" + mentionId + ";");
+            PreparedStatement ps = connection.prepareStatement("SELECT mention_id FROM tweet_records WHERE mention_id = ?");
+
+            ps.setString(1, mentionId);
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -41,20 +45,4 @@ public class DBHelper {
         return mention.toString();
     }
 
-    public static String lastSearchId() {
-        StringBuilder sinceId = new StringBuilder();
-        try {
-            connection = DriverManager.getConnection(DATABASE);
-            PreparedStatement ps = connection.prepareStatement("SELECT mention_id FROM tweet_records ORDER BY Id DESC LIMIT 1;");
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                sinceId.append(rs.getString("mention_id"));
-            }
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return sinceId.toString();
-    }
 }
