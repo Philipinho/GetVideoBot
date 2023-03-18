@@ -24,10 +24,6 @@ public class Stream {
 
         String botUsername = ReadProperty.getValue("twitter.username");
 
-        int retryCount = 0;
-        int maxRetries = 5;
-
-        while (retryCount < maxRetries) {
             try {
                 List<StreamRules.StreamRule> rules = twitter.retrieveFilteredStreamRules();
 
@@ -44,30 +40,16 @@ public class Stream {
 
                 System.out.println("Stream connected to: " + botUsername);
 
-                break;
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Exception: " + e.getMessage());
-
-                retryCount++;
-                if (retryCount < maxRetries) {
-                    try {
-                        // Wait for 1 minute before retrying
-                        Thread.sleep(60 * 1000);
-                    } catch (InterruptedException ie) {
-                        ie.printStackTrace();
-                    }
-                } else {
-                    System.out.println("Max retries reached. Exiting...");
-                }
             }
-        }
-        //                //{"title":"ConnectionException","detail":"Your subscription change is currently being provisioned, please try again in a minute.","connection_issue":"ProvisioningSubscription","type":"https://api.twitter.com/2/problems/streaming-connection"}
 
         twitter.startFilteredStream(new IAPIEventListener() {
             @Override
             public void onStreamError(int i, String s) {
                 System.out.println("Stream error: " + s);
+                //{"title":"ConnectionException","detail":"Your subscription change is currently being provisioned, please try again in a minute.","connection_issue":"ProvisioningSubscription","type":"https://api.twitter.com/2/problems/streaming-connection"}
             }
 
             @Override
@@ -117,7 +99,7 @@ public class Stream {
                                 String responseText = tweetMessage(userToReply);
 
                                 try {
-                                    replyTweet(responseText, tweet.getId(), userToReply);
+                                  //  replyTweet(responseText, tweet.getId(), userToReply);
                                 } catch (Exception e) {
 
                                     if (e.getMessage().contains("User is over daily status update limit")) {
